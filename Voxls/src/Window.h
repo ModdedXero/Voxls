@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Vulkan.h"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -39,6 +41,7 @@ namespace Voxls
 		Window(const WindowProps& props);
 
 		GLFWwindow* m_Window;
+		Vulkan* m_Vulkan;
 
 		struct WindowData
 		{

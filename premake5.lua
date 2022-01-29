@@ -19,7 +19,7 @@ IncludeDir["Vulkan"] = "Voxls/vendor/vulkan/include"
 include "Voxls/vendor/GLFW"
 	
 project "Voxls"
-	location "Voxls"
+	location "Voxls/src"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"

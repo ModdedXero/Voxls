@@ -14,12 +14,17 @@ namespace Voxls
 			return;
 		}
 
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
 		m_Window = glfwCreateWindow(props.Width, props.Height, props.Title, NULL, NULL);
 		if (!m_Window)
 		{
 			// Log Error
 			return;
 		}
+
+		m_Vulkan = Vulkan::Create(props.Title);
 	}
 
 	void Window::OnUpdate()
@@ -34,6 +39,8 @@ namespace Voxls
 
 	void Window::OnDestory()
 	{
+		m_Vulkan->OnDestroy();
+
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}

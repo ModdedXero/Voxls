@@ -1,0 +1,3 @@
+[submodule "Voxls/vendor/GLFW"]
+	path = Voxls/vendor/GLFW
+	url = https://github.com/TheCherno/glfw.git

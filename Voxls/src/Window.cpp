@@ -24,7 +24,7 @@ namespace Voxls
 			return;
 		}
 
-		m_Vulkan = Vulkan::Create(props.Title);
+		m_Vulkan = Vulkan::Create(props.Title, m_Window);
 	}
 
 	void Window::OnUpdate()

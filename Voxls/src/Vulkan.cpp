@@ -8,10 +8,16 @@
 
 namespace Voxls
 {
-	// Desired Validation layers
+	// Required Validation layers
 	const std::vector<const char*> validationLayers =
 	{
 		"VK_LAYER_KHRONOS_validation"
+	};
+
+	// Required Device Extensions
+	const std::vector<const char*> deviceExtensions =
+	{
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 
 	Vulkan* Vulkan::Create(const char* title, GLFWwindow* window)
@@ -155,12 +161,6 @@ namespace Voxls
 
 	bool Vulkan::isPhysicalDeviceValid(VkPhysicalDevice device)
 	{
-		VkPhysicalDeviceProperties deviceProperties;
-		vkGetPhysicalDeviceProperties(device, &deviceProperties);
-
-		VkPhysicalDeviceFeatures deviceFeatures;
-		vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
 		QueueFamilyIndices indices = findQueueFamilies(device);
 
 		VkDeviceQueueCreateInfo queueCreateInfo{};
@@ -173,7 +173,26 @@ namespace Voxls
 
 		VkPhysicalDeviceFeatures deviceFeatures{};
 
-		return indices.isValue();
+		bool extensionsSupported = checkDeviceExtensionSupport(device);
+
+		return indices.isValue() && extensionsSupported;
+	}
+
+	bool Vulkan::checkDeviceExtensionSupport(VkPhysicalDevice device)
+	{
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+		std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+		for (const auto& extension : availableExtensions) {
+			requiredExtensions.erase(extension.extensionName);
+		}
+
+		return requiredExtensions.empty();
 	}
 
 	QueueFamilyIndices Vulkan::findQueueFamilies(VkPhysicalDevice device)
@@ -210,17 +229,30 @@ namespace Voxls
 		return indices;
 	}
 
+	SwapChainSupportDetails Vulkan::querySwapChainSupport(VkPhysicalDevice device)
+	{
+		SwapChainSupportDetails details;
+
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_Surface, &details.capabilities);
+
+		uint32_t formatCount;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, nullptr);
+
+		if (formatCount != 0)
+		{
+			details.formats.resize(formatCount);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, details.formats.data());
+		}
+
+		// TODO: Continue with Swap Chains Here!!!
+		// Querying details of swap chain support
+
+		return details;
+	}
+
 	void Vulkan::createLogicalDevice()
 	{
 		QueueFamilyIndices indices = findQueueFamilies(m_PhysicalDevice);
-
-		VkDeviceQueueCreateInfo queueCreateInfo{};
-		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-		queueCreateInfo.queueCount = 1;
-
-		float queuePriority = 1.0f;
-		queueCreateInfo.pQueuePriorities = &queuePriority;
 
 		VkPhysicalDeviceFeatures deviceFeatures{};
 
@@ -244,7 +276,8 @@ namespace Voxls
 
 		createInfo.pEnabledFeatures = &deviceFeatures;
 
-		createInfo.enabledExtensionCount = 0;
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 #ifdef VX_DEBUG
 		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());

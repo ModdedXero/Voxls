@@ -16,6 +16,12 @@ namespace Voxls
 		}
 	};
 
+	struct SwapChainSupportDetails {
+		VkSurfaceCapabilitiesKHR capabilities;
+		std::vector<VkSurfaceFormatKHR> formats;
+		std::vector<VkPresentModeKHR> presentModes;
+	};
+
 	class Vulkan
 	{
 	public:
@@ -44,7 +50,9 @@ namespace Voxls
 
 		void selectPhysicalDevice();
 		bool isPhysicalDeviceValid(VkPhysicalDevice device);
+		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
 		void createLogicalDevice();
 	};
